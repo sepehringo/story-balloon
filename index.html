@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Balloon Journey - Story Adventure</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/preloader.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Top game bar -->
+        <div id="gameHeader">
+            <div id="fuelBar">
+                <div id="fuelFill"></div>
+                <span id="fuelText">Fuel: 100%</span>
+            </div>
+            <div id="gameInfo">
+                <div>⭐ <span id="starsCount">0</span></div>
+                <div>📏 <span id="altitude">0</span>/<span id="targetAltitude">500</span>m</div>
+            </div>
+            <div id="menuButtons">
+                <button id="howToPlayBtn" class="small-btn">How to Play</button>
+                <button id="levelSelectBtn" class="small-btn">Level Select</button>
+                <button id="creditsBtn" class="small-btn">Credits</button>
+                <button id="audioToggleBtn" aria-label="toggle audio">🔊</button>
+            </div>
+        </div>
+        
+        <!-- Game canvas -->
+        <canvas id="gameCanvas" tabindex="0"></canvas>
+        
+        <!-- Mobile control buttons -->
+        <div id="mobileControls" class="hidden">
+            <button id="leftBtn" class="control-btn">◀</button>
+            <button id="rightBtn" class="control-btn">▶</button>
+        </div>
+        
+        <!-- Game Controls -->
+        <div id="gameControls">
+            <button id="startBtn" class="btn">Start Game</button>
+            <div id="touchControl">
+                <p>
+                    📱 Tap left third = Move left &nbsp;|&nbsp; Tap right third = Move right<br>
+                    🔼 Tap middle = Rise up &nbsp;|&nbsp; Tap upper corners = Diagonal movement
+                </p>
+            </div>
+        </div>
+        
+        <!-- Developer Menu (for testing) -->
+        <div id="devMenu" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; z-index: 10000; display: none;">
+            <div style="color: white; margin-bottom: 10px; font-size: 14px;">🛠️ Dev Menu</div>
+            <button onclick="game.startStage(1)" style="display: block; margin: 5px 0; padding: 5px 10px; width: 100%;">Stage 1</button>
+            <button onclick="game.startStage(2)" style="display: block; margin: 5px 0; padding: 5px 10px; width: 100%;">Stage 2</button>
+            <button onclick="game.startStage(3)" style="display: block; margin: 5px 0; padding: 5px 10px; width: 100%;">Stage 3</button>
+            <button onclick="game.startStage(4)" style="display: block; margin: 5px 0; padding: 5px 10px; width: 100%;">Stage 4</button>
+            <button onclick="document.getElementById('devMenu').style.display='none'" style="display: block; margin: 5px 0; padding: 5px 10px; width: 100%; background: #ff4444;">Close</button>
+        </div>
+        
+        <!-- Main Menu Modal -->
+        <div id="mainMenuModal" class="modal">
+            <div class="modal-content" style="text-align: center;">
+                <h1 style="font-size: 48px; margin-bottom: 20px;">🎈 Balloon Journey</h1>
+                <p style="font-size: 18px; margin-bottom: 30px;">An adventure through the skies</p>
+                <button id="startAdventureBtn" class="btn" style="font-size: 20px; padding: 15px 40px; margin: 10px;">Start Adventure ✨</button>
+                <button id="mainMenuLevelSelectBtn" class="btn" style="font-size: 18px; padding: 12px 30px; margin: 10px;">Level Select 🎮</button>
+                <button id="mainMenuHowToPlayBtn" class="btn" style="font-size: 18px; padding: 12px 30px; margin: 10px;">How to Play 📖</button>
+                <button id="mainMenuCreditsBtn" class="btn" style="font-size: 18px; padding: 12px 30px; margin: 10px;">Credits 🎬</button>
+            </div>
+        </div>
+        
+        <!-- Story Modal (English) -->
+        <div id="storyModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🎈 Kami's Skyward Wish</h2>
+                <p>Kami always dreamed of seeing the world from above and giving wings to his dreams.</p>
+                <p>His kind grandfather opened an old wooden chest and entrusted the family's balloon to Kami.</p>
+                <p><strong>🎯 Objective:</strong> Reach 500 meters to take the first step of your dream.</p>
+                <button id="startStoryBtn" class="btn">Start Adventure ✨</button>
+            </div>
+        </div>
+        
+        <!-- Stage 2 Modal (English) -->
+        <div id="stage2Modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>⛰️ Plains and Peaks</h2>
+                <p>Kami thinks it's still a simple journey; he flies among plains and mountains and enjoys the freedom.</p>
+                <p>In the distance, Sami watches carefully with a plan in mind.</p>
+                <p><strong>🎯 Objective:</strong> Reach 1,500 meters and collect more stars along the way.</p>
+                <button id="startStage2Btn" class="btn">Start Stage 2 ⛰️</button>
+            </div>
+        </div>
+        
+        <!-- Stage 3 Modal (English) -->
+        <div id="stage3Modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🏙️ City Celebration</h2>
+                <p>Kami enters the city; people cheer and wave for him with joy.</p>
+                <p>The excitement and fatigue of the journey weigh on him, and he takes a moment to rest.</p>
+                <p><strong>🎯 Objective:</strong> Travel 5,000 meters across the city sky and watch out for the crowd's excitement.</p>
+                <button id="startStage3Btn" class="btn">Start Stage 3 🏙️</button>
+            </div>
+        </div>
+
+        <!-- Stage 4 Modal (English) -->
+        <div id="stage4Modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🔥 Last Fuel & Sami's Secret</h2>
+                <p>Kami is tired and disheartened; his dream faces a tough stretch and the balloon's fuel is running low.</p>
+                <p>He discovers Sami has hidden his loved one somewhere in the sky.</p>
+                <p><strong>🎯 Objective:</strong> Reach Sami's balloon and rescue your love.</p>
+                <button id="startStage4Btn" class="btn">Start Stage 4 ⚔️</button>
+            </div>
+        </div>
+
+        <!-- Stage 5 Modal (Epilogue) -->
+        <div id="stage5Modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🎬 Sky Epilogue</h2>
+                <p>Kami and his love are reunited. The sky is for joy now, with no enemies ahead.</p>
+                <p>They decide to jump hand-in-hand from the balloon and fly freely.</p>
+                <p><strong>🎯 Objective:</strong> Just enjoy the ending; this is Kami's dream finale.</p>
+                <button id="startStage5Btn" class="btn">Start Epilogue 💞</button>
+            </div>
+        </div>
+        
+        <!-- Game Over Modal -->
+        <div id="gameOverModal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="gameResultTitle"></h2>
+                <p id="gameResultText"></p>
+                <div id="gameStats"></div>
+                <button id="restartBtn" class="btn">Retry 🔄</button>
+                <button id="nextStageBtn" class="btn hidden">Next Stage ➡️</button>
+            </div>
+        </div>
+
+        <!-- How to Play Modal (Advanced Tutorial) -->
+        <div id="howToPlayModal" class="modal hidden">
+            <div class="modal-content tutorial-content">
+                <div class="tutorial-header">
+                    <h2>How to Play</h2>
+                    <span class="tutorial-page-indicator">
+                        <span id="currentPage">1</span> / <span id="totalPages">5</span>
+                    </span>
+                </div>
+                
+                <div id="tutorialPages">
+                    <!-- Page 1: Controls -->
+                    <div class="tutorial-page active" data-page="1">
+                        <h3>🎮 Controls</h3>
+                        <div class="tutorial-visual">
+                            <div class="control-demo">
+                                <div class="control-section">
+                                    <div class="keyboard-visual">
+                                        <div class="key-row">
+                                            <div class="key">↑</div>
+                                        </div>
+                                        <div class="key-row">
+                                            <div class="key">←</div>
+                                            <div class="key">→</div>
+                                        </div>
+                                        <div class="key-row-space">
+                                            <div class="key key-space">SPACE</div>
+                                        </div>
+                                    </div>
+                                    <p class="control-label">⌨️ Keyboard</p>
+                                </div>
+                                <div class="control-section">
+                                    <div class="mouse-visual">
+                                        <div class="mouse-icon">🖱️</div>
+                                        <div class="click-indicator">Click & Hold</div>
+                                    </div>
+                                    <p class="control-label">🖱️ Mouse</p>
+                                </div>
+                                <div class="control-section">
+                                    <div class="touch-visual">
+                                        <div class="screen-demo">
+                                            <div class="touch-zone left">◀<br>Left</div>
+                                            <div class="touch-zone middle">▲<br>Rise</div>
+                                            <div class="touch-zone right">▶<br>Right</div>
+                                        </div>
+                                    </div>
+                                    <p class="control-label">📱 Touch</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="tutorial-desc">Use arrow keys, WASD, mouse clicks, or touch controls to pilot your balloon!</p>
+                    </div>
+                    
+                    <!-- Page 2: Fuel System -->
+                    <div class="tutorial-page" data-page="2">
+                        <h3>⛽ Fuel Management</h3>
+                        <div class="tutorial-visual">
+                            <div class="fuel-demo">
+                                <div class="fuel-bar-demo">
+                                    <div class="fuel-bar-outer">
+                                        <div class="fuel-bar-inner" style="width: 60%;"></div>
+                                        <span class="fuel-text">Fuel: 60%</span>
+                                    </div>
+                                </div>
+                                <div class="fuel-explanation">
+                                    <div class="fuel-item">
+                                        <span class="fuel-icon">🔥</span>
+                                        <span>Heating uses fuel</span>
+                                    </div>
+                                    <div class="fuel-item">
+                                        <span class="fuel-icon">⛽</span>
+                                        <span>Collect fuel items</span>
+                                    </div>
+                                    <div class="fuel-item">
+                                        <span class="fuel-icon">⚠️</span>
+                                        <span>Don't run out!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="tutorial-desc">Your balloon needs fuel to rise. Collect fuel items to stay airborne!</p>
+                    </div>
+                    
+                    <!-- Page 3: Collectibles -->
+                    <div class="tutorial-page" data-page="3">
+                        <h3>⭐ Collect Stars</h3>
+                        <div class="tutorial-visual">
+                            <div class="collectibles-demo">
+                                <div class="item-showcase">
+                                    <div class="showcase-item">
+                                        <span class="big-icon">⭐</span>
+                                        <p>Stars</p>
+                                        <small>+10 points each</small>
+                                    </div>
+                                    <div class="showcase-item">
+                                        <span class="big-icon">⛽</span>
+                                        <p>Fuel</p>
+                                        <small>Refills energy</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="tutorial-desc">Collect stars for points and fuel to keep flying!</p>
+                    </div>
+                    
+                    <!-- Page 4: Obstacles -->
+                    <div class="tutorial-page" data-page="4">
+                        <h3>⚠️ Avoid Obstacles</h3>
+                        <div class="tutorial-visual">
+                            <div class="obstacles-demo">
+                                <div class="obstacle-grid">
+                                    <div class="obstacle-item">
+                                        <span class="danger-icon">⛰️</span>
+                                        <p>Mountains</p>
+                                    </div>
+                                    <div class="obstacle-item">
+                                        <span class="danger-icon">🦅</span>
+                                        <p>Birds</p>
+                                    </div>
+                                    <div class="obstacle-item">
+                                        <span class="danger-icon">⚡</span>
+                                        <p>Lightning</p>
+                                    </div>
+                                    <div class="obstacle-item">
+                                        <span class="danger-icon">🏢</span>
+                                        <p>Buildings</p>
+                                    </div>
+                                    <div class="obstacle-item">
+                                        <span class="danger-icon">🔫</span>
+                                        <p>Shooters</p>
+                                    </div>
+                                    <div class="obstacle-item">
+                                        <span class="danger-icon">🦹‍♂️</span>
+                                        <p>Enemies</p>
+                                    </div>
+                                </div>
+                                <div class="warning-box">
+                                    <span class="warning-icon">💥</span>
+                                    <p>Collision = Game Over!</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="tutorial-desc">Hit any obstacle and your journey ends. Stay alert!</p>
+                    </div>
+                    
+                    <!-- Page 5: Stage Goals -->
+                    <div class="tutorial-page" data-page="5">
+                        <h3>🎯 Stage Objectives</h3>
+                        <div class="tutorial-visual">
+                            <div class="stages-demo">
+                                <div class="stage-list">
+                                    <div class="stage-objective">
+                                        <span class="stage-num">1</span>
+                                        <p>Reach 500m altitude</p>
+                                    </div>
+                                    <div class="stage-objective">
+                                        <span class="stage-num">2</span>
+                                        <p>Reach 1,500m altitude</p>
+                                    </div>
+                                    <div class="stage-objective">
+                                        <span class="stage-num">3</span>
+                                        <p>Travel 3,000m distance</p>
+                                    </div>
+                                    <div class="stage-objective">
+                                        <span class="stage-num">4</span>
+                                        <p>Rescue your love (5,000m)</p>
+                                    </div>
+                                    <div class="stage-objective">
+                                        <span class="stage-num">5</span>
+                                        <p>Freedom (Endless)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="tutorial-desc">Each stage has unique goals. Complete them to unlock the next!</p>
+                    </div>
+                </div>
+                
+                <div class="tutorial-navigation">
+                    <button id="tutorialBackBtn" class="btn btn-secondary">Back to Menu</button>
+                    <div class="tutorial-nav-buttons">
+                        <button id="tutorialPrevBtn" class="btn btn-nav" disabled>← Previous</button>
+                        <button id="tutorialNextBtn" class="btn btn-nav">Next →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credits Modal -->
+        <div id="creditsModal" class="modal hidden">
+            <div class="modal-content credits-content">
+                <h2>Credits</h2>
+                <div class="credits-top">
+                    <div class="credits-logo" vertical-align="top" >
+                        <img src="assets/vexel.png" alt="Logo" id="creditsLogo" onerror="this.style.display='none'" />
+                    </div>
+                    <div class="credits-info">
+                        <p><strong>Group Leader:</strong></p> <p>Mohammad Mehdi Shirmohammadi<br><a href="mailto:Mmshirmohammadi@iau.ac.ir">Mmshirmohammadi@iau.ac.ir</a></p>
+                        <p><strong>Executive Director:</strong></p> <p> Ali Hamzehi<br><a href="mailto:Alihamzehi2468@gmail.com">Alihamzehi2468@gmail.com</a></p>
+                    </div>
+                </div>
+
+                <div class="credits-main">
+                    <p><strong>Game Designers:</strong><br>Sepehr Kheiri</p>
+                    <p><strong>Computer Games Research Group</strong><br>Islamic Azad University, Hamedan Branch</p>
+                </div>
+
+                <div class="credits-bottom">
+                    <p></p>
+                </div>
+
+                <div class="credits-actions">
+                    <button id="closeCreditsBtn" class="btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Select Modal -->
+        <div id="levelSelectModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Level Select</h2>
+                <div id="levelList">
+                    <!-- Levels will be populated dynamically -->
+                </div>
+                <button id="closeLevelSelectBtn" class="btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/preloader.js"></script>
+    <script src="js/sound-manager.js"></script>
+    <script src="js/balloon.js"></script>
+    <script src="js/obstacles.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/stage-objects.js"></script>
+    <script src="js/game-new.js"></script>
+</body>
+</html>
